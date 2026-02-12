@@ -8,6 +8,15 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
+    .preview-img {
+        position: absolute;
+        width: 1200px;
+        height: 630px;
+        object-fit: cover;
+        opacity: 0;
+        pointer-events: none;
+        left: -9999px;
+      }
     /* 📱 Responsive scaling by width AND height */
 @media (max-width: 600px), (max-height: 700px) {
 
@@ -226,6 +235,13 @@
 </head>
 <body>
 
+    <!-- Hidden preview image for link scrapers -->
+  <img 
+    src="cake-preview.png" 
+    alt="Delicious cake website preview"
+    class="preview-img"
+    />
+
   <canvas id="confettiCanvas"></canvas>
   <div class="hearts-bg" id="hearts"></div>
 
@@ -425,4 +441,5 @@
   </script>
 </body>
 </html>
+
 
