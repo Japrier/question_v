@@ -5,18 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Dessert Ideas</title>
 
+  <!-- Link preview (iMessage, Slack, Facebook, etc. read these, not page content) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Dessert Ideas" />
+  <meta property="og:description" content="A few sweet treat ideas 🍰" />
+  <meta property="og:image" content="chocolate-cake.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dessert Ideas" />
+  <meta name="twitter:description" content="A few sweet treat ideas 🍰" />
+  <meta name="twitter:image" content="chocolate-cake.png" />
+
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    .preview-img {
-        position: absolute;
-        width: 1200px;
-        height: 630px;
-        object-fit: cover;
-        opacity: 0;
-        pointer-events: none;
-        left: -9999px;
-      }
     /* 📱 Responsive scaling by width AND height */
 @media (max-width: 600px), (max-height: 700px) {
 
@@ -75,6 +78,10 @@
 
   .heart-float {
     font-size: clamp(26px, 4vh, 38px);
+  }
+
+  .customize-panel {
+    width: 88vw;
   }
 }
 
@@ -231,24 +238,107 @@
       opacity: 0;
       transition: opacity 1.8s ease;
     }
+
+    /* ── Customize toggle + panel (name is hex-encoded in the share link) ── */
+    .customize-toggle {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 245, 247, 0.9);
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 1100;
+    }
+
+    .customize-panel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 260px;
+      max-width: 88vw;
+      background: #fff5f7;
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 18px;
+      transform: translateY(-16px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 1100;
+    }
+
+    .customize-panel.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .customize-panel h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .customize-panel label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .customize-panel input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 2px solid var(--yes);
+      outline: none;
+      font-size: 15px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    #shareLinkBtn {
+      position: static;
+      transform: none;
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      background: var(--yes);
+      color: white;
+    }
+
+    #shareLinkBtn:hover {
+      background: var(--yesHover);
+    }
   </style>
 </head>
 <body>
 
-    <!-- Hidden preview image for link scrapers -->
-  <img 
-    src="https://www.publicdomainpictures.net/pictures/750000/nahled/chocolate-cake.png" 
-    alt="Delicious cake website preview"
-    class="preview-img"
-    />
-
   <canvas id="confettiCanvas"></canvas>
   <div class="hearts-bg" id="hearts"></div>
+
+  <!-- ✅ Customize name + share link (name is hex-encoded in the URL) -->
+  <div class="customize-toggle" id="customizeToggle">✏️</div>
+  <div class="customize-panel" id="customizePanel">
+    <h3>Customize</h3>
+    <label for="nameInput">Their name:</label>
+    <input type="text" id="nameInput" placeholder="Enter a name" />
+    <button id="shareLinkBtn">Copy Share Link</button>
+  </div>
 
   <main class="card">
     <img id="character" class="art" src="" alt="Cute valentine character" />
 
-    <h1 id="question">Emily will you be my valentine?</h1>
+    <h1 id="question">Baby will you be my valentine?</h1>
 
     <section class="button-zone" id="zone">
       <button id="yesBtn">Yes</button>
@@ -259,7 +349,7 @@
 
     <section class="result" id="result">
       <h2>YAY! 🎀💕</h2>
-      <img class="fireworks" src="https://media.tenor.com/Kaa-GHhhWl8AAAAM/lpg.gif" alt="Celebration" />
+      <img class="fireworks" src="celebration.gif" alt="Celebration" />
       <p id="sweet-msg"></p>
     </section>
   </main>
@@ -269,22 +359,58 @@
 
     const characters = [
       // 0: Cute bear with heart
-      "https://www.publicdomainpictures.net/pictures/580000/nahled/teddybar-herz-valentinstag-clipart.png",
+      "teddybear.png",
       // 1: Cute cat
-      "https://pngimg.com/uploads/cat/cat_PNG50491.png",
+      "cat.png",
       // 2: Cute bunny
-      "https://www.publicdomainpictures.net/pictures/740000/nahled/vintage-valentine-rabbit-1763242806K3e.jpg",
+      "bunny.jpg",
       // 3: Highland cow
-      "https://png.pngtree.com/png-vector/20250104/ourmid/pngtree-a-valentine-adorable-highland-calf-with-jar-clipart-vector-png-image_15050053.png"
+      "highland-cow.png"
     ];
 
     const SELECTED_CHARACTER = 3;   // ← Change to 0, 1, or 2
 
+    // ─── Name customization (hex-encoded in the URL, same approach as the candle app) ────
+
+    function toHex(str) {
+      return [...str].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+    }
+    function fromHex(hex) {
+      let str = '';
+      for (let i = 0; i < hex.length; i += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+      }
+      return str;
+    }
+
+    function getNameFromURL() {
+      // New format: #n=<hex> in the hash
+      if (location.hash) {
+        const hash = location.hash.slice(1);
+        const params = new URLSearchParams(hash);
+        const nParam = params.get("n");
+        if (nParam) {
+          try {
+            const decoded = fromHex(nParam).trim();
+            if (decoded) return decoded;
+          } catch {
+            // fall through to legacy/default
+          }
+        }
+      }
+      // Legacy support: old plain-text ?to= query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const toParam = urlParams.get("to");
+      if (toParam) return toParam;
+
+      return "Baby";
+    }
+
+    let currentName = getNameFromURL();
+
     // ─── Logic ─────────────────────────────────────────
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const name = urlParams.get("to") || "Emily";
-    document.getElementById("question").textContent = `${name} will you be my valentine?`;
+    document.getElementById("question").textContent = `${currentName} will you be my valentine?`;
 
     document.getElementById("character").src = characters[SELECTED_CHARACTER];
 
@@ -294,6 +420,34 @@
     const result = document.getElementById("result");
     const hint = document.getElementById("hint");
     const sweetMsg = document.getElementById("sweet-msg");
+
+    const customizeToggle = document.getElementById("customizeToggle");
+    const customizePanel = document.getElementById("customizePanel");
+    const nameInput = document.getElementById("nameInput");
+    const shareLinkBtn = document.getElementById("shareLinkBtn");
+
+    if (nameInput) nameInput.value = currentName;
+
+    customizeToggle?.addEventListener("click", () => {
+      customizePanel.classList.toggle("open");
+    });
+
+    nameInput?.addEventListener("input", () => {
+      currentName = nameInput.value.trim() || "Emily";
+      document.getElementById("question").textContent = `${currentName} will you be my valentine?`;
+    });
+
+    shareLinkBtn?.addEventListener("click", () => {
+      const hexName = toHex(currentName);
+      const hashStr = `#n=${hexName}`;
+      const urlWithHash = location.pathname + hashStr;
+      history.replaceState(null, '', urlWithHash);
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(location.href).catch(() => {});
+      }
+      alert("Share link ready! (Copied to clipboard if allowed)");
+    });
 
     // Confetti setup
     const confettiCanvas = document.getElementById("confettiCanvas");
@@ -441,6 +595,3 @@
   </script>
 </body>
 </html>
-
-
-
